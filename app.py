@@ -1,10 +1,11 @@
-import os, sys
+import os
+import sys
 from flask import Flask
 from flask_hookserver import Hooks
 import tweepy
 
+
 # encoding=utf8
-reload(sys)
 sys.setdefaultencoding('utf8')
 
 twitter_consumer_key = os.environ['OSII_BOT_CONSUMER_KEY']
@@ -27,23 +28,25 @@ app.config['VALIDATE_IP'] = False
 app.config['VALIDATE_SIGNATURE'] = True
 hooks = Hooks(app, url='/webhooks')
 
+
 # flask routes
 @app.route('/')
 def hello():
     return '<a href="{0}">{0}</a>'.format('https://github.com/open-source-ideas')
 
+
 @hooks.hook('issues')
 def issues(data, delivery):
     twitter_update_status = 'This hook is not implemented'
     # Tweet only newly created issues
-    if (data['action'] == 'opened'):
+    if data['action'] == 'opened':
         tweet_max_len = 278
         title = 'New open source idea!'
         url = data['issue']['html_url']
-        desc = data['issue']['title'][0:(tweet_max_len-len(title)-len(url))]
+        desc = data['issue']['title'][0:(tweet_max_len - len(title) - len(url))]
         tweet = '{} {} {}'.format(title, desc, url)
         twitter_update_status = twitter_api.update_status(tweet)
     return str(twitter_update_status)
-    
+
 # app running on c9.io
 # app.run(host=os.getenv('IP', '0.0.0.0'),port=int(os.getenv('PORT', 8080)))
